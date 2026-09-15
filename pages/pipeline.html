@@ -1,0 +1,1100 @@
+<title>一次前沿训练的全流程</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --paper: #f4f6f4;
+  --card: #ffffff;
+  --card-2: #eceeec;
+  --rule: #d3d8d5;
+  --rule-soft: #e3e7e4;
+  --ink: #14191a;
+  --ink-2: #454f4e;
+  --ink-3: #78827f;
+  --flow: #1c6b63;
+  --flow-wash: rgba(28, 107, 99, 0.11);
+  --loss: #9c4a3f;
+  --loss-wash: rgba(156, 74, 63, 0.12);
+  --hold: #8a6510;
+  --hold-wash: rgba(138, 101, 16, 0.13);
+  --display: "Newsreader", Georgia, "Songti SC", serif;
+  --sans: "Public Sans", ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0d1112;
+    --card: #141a1b;
+    --card-2: #1b2223;
+    --rule: #2a3334;
+    --rule-soft: #222a2b;
+    --ink: #e2e8e6;
+    --ink-2: #a5b0ad;
+    --ink-3: #6f7b79;
+    --flow: #5cb5a7;
+    --flow-wash: rgba(92, 181, 167, 0.14);
+    --loss: #dd8578;
+    --loss-wash: rgba(221, 133, 120, 0.14);
+    --hold: #c9a352;
+    --hold-wash: rgba(201, 163, 82, 0.15);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0d1112;
+  --card: #141a1b;
+  --card-2: #1b2223;
+  --rule: #2a3334;
+  --rule-soft: #222a2b;
+  --ink: #e2e8e6;
+  --ink-2: #a5b0ad;
+  --ink-3: #6f7b79;
+  --flow: #5cb5a7;
+  --flow-wash: rgba(92, 181, 167, 0.14);
+  --loss: #dd8578;
+  --loss-wash: rgba(221, 133, 120, 0.14);
+  --hold: #c9a352;
+  --hold-wash: rgba(201, 163, 82, 0.15);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1080px; margin: 0 auto; padding: 56px 28px 90px; }
+.prose { max-width: 68ch; }
+a { color: var(--flow); text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--flow); outline-offset: 2px; border-radius: 2px; }
+code, .mono { font-family: var(--mono); font-size: 0.87em; font-variant-numeric: tabular-nums; }
+code { background: var(--card-2); padding: 1px 5px; border-radius: 3px; }
+
+/* ---------- masthead ---------- */
+.eyebrow {
+  font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-3); margin: 0 0 14px;
+}
+h1 {
+  font-family: var(--display); font-weight: 500; font-size: clamp(34px, 5.2vw, 52px);
+  line-height: 1.1; letter-spacing: -0.015em; margin: 0 0 18px; text-wrap: balance;
+}
+.standfirst {
+  font-family: var(--display); font-size: 20px; line-height: 1.55;
+  color: var(--ink-2); max-width: 60ch; margin: 0 0 34px;
+}
+.standfirst em { font-style: italic; color: var(--ink); }
+
+.ledger {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+  margin-bottom: 60px;
+}
+@media (max-width: 720px) { .ledger { grid-template-columns: repeat(2, 1fr); } }
+.ledger > div { background: var(--card); padding: 16px 18px; }
+.ledger dt {
+  font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 4px;
+}
+.ledger dd {
+  margin: 0; font-family: var(--mono); font-size: 21px; font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.ledger .sub { font-family: var(--sans); font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+
+/* ---------- stations ---------- */
+.station { margin: 0 0 62px; }
+.station-head {
+  display: flex; align-items: baseline; gap: 16px;
+  border-bottom: 1px solid var(--rule); padding-bottom: 10px; margin-bottom: 22px;
+}
+.station-num {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--flow);
+  border: 1px solid var(--flow); border-radius: 2px; padding: 1px 7px; flex-shrink: 0;
+}
+.station-head h2 {
+  font-family: var(--display); font-weight: 500; font-size: 27px;
+  margin: 0; letter-spacing: -0.01em; flex: 1;
+}
+.station-head .where {
+  font-family: var(--mono); font-size: 12px; color: var(--ink-3); text-align: right;
+}
+h3 {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3);
+  margin: 32px 0 12px;
+}
+p { margin: 0 0 16px; }
+
+/* ---------- flow strip ---------- */
+.flowstrip {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 13px;
+  background: var(--card); border: 1px solid var(--rule);
+  border-left: 3px solid var(--flow);
+  padding: 11px 16px; margin: 0 0 22px;
+}
+.flowstrip .k { color: var(--ink-3); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; }
+.flowstrip .v { font-weight: 500; }
+.flowstrip .arrow { color: var(--ink-3); }
+.flowstrip .drop { color: var(--loss); }
+
+/* ---------- figures ---------- */
+figure { margin: 26px 0 30px; }
+figure svg { width: 100%; max-width: 100%; height: auto; display: block; color: var(--ink); }
+figcaption {
+  font-size: 13.5px; color: var(--ink-3); margin-top: 12px;
+  max-width: 74ch; line-height: 1.55;
+}
+.fig-frame {
+  background: var(--card); border: 1px solid var(--rule);
+  padding: 22px 20px; overflow-x: auto;
+}
+.fig-frame > svg { min-width: 620px; }
+
+/* ---------- tables ---------- */
+.tablewrap { overflow-x: auto; margin: 0 0 22px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 520px; }
+th {
+  text-align: left; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600; padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--rule); white-space: nowrap;
+}
+td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+td.mono, th.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: none; }
+.dim { color: var(--ink-3); }
+
+/* ---------- stage list ---------- */
+.stages { list-style: none; margin: 0 0 22px; padding: 0; display: grid; gap: 1px;
+  background: var(--rule); border: 1px solid var(--rule); }
+.stages li {
+  background: var(--card); padding: 10px 15px;
+  display: grid; grid-template-columns: 30px 190px 1fr; gap: 14px; align-items: baseline;
+  font-size: 14px;
+}
+@media (max-width: 640px) { .stages li { grid-template-columns: 26px 1fr; } .stages li .desc { grid-column: 1 / -1; } }
+.stages .i { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+.stages .n { font-family: var(--mono); font-size: 13px; color: var(--flow); }
+.stages .desc { color: var(--ink-2); }
+.stages li.global { background: var(--flow-wash); }
+
+/* ---------- callout ---------- */
+.note {
+  background: var(--card); border: 1px solid var(--rule);
+  border-left: 3px solid var(--hold);
+  padding: 16px 20px; margin: 24px 0;
+}
+.note p:last-child { margin-bottom: 0; }
+.note .tag {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--hold); display: block; margin-bottom: 6px;
+}
+.note.flow { border-left-color: var(--flow); }
+.note.flow .tag { color: var(--flow); }
+
+/* ---------- pills ---------- */
+.pill {
+  display: inline-block; font-family: var(--mono); font-size: 11px;
+  padding: 1px 6px; border-radius: 2px; background: var(--card-2); color: var(--ink-2);
+  border: 1px solid var(--rule-soft); white-space: nowrap;
+}
+.pill.have { background: var(--flow-wash); color: var(--flow); border-color: transparent; }
+.pill.gone { background: var(--loss-wash); color: var(--loss); border-color: transparent; }
+
+footer {
+  border-top: 1px solid var(--rule); margin-top: 70px; padding-top: 20px;
+  font-size: 13px; color: var(--ink-3); max-width: 74ch;
+}
+footer p { margin-bottom: 8px; }
+</style>
+
+<div class="page">
+
+<p class="eyebrow">Marin · 535B-A23B · 现场记录</p>
+<h1>一次前沿训练的全流程</h1>
+<p class="standfirst">
+Marin 把一个 5,354 亿参数模型的训练过程<em>全程公开</em>——代码、数据配比、检查点、事故日志，实时。
+这页把那台机器拆开，一站一站走一遍，用的全是它<em>此刻</em>正在跑的真实数字。
+</p>
+
+<dl class="ledger">
+  <div><dt>原始数据池</dt><dd>25.6T</dd><div class="sub">tokens，292 个来源</div></div>
+  <div><dt>训练预算</dt><dd>18T</dd><div class="sub">tokens ≈ 2.70e24 FLOPs</div></div>
+  <div><dt>算力</dt><dd>704</dd><div class="sub">GB200，11 个 NVL72 机架</div></div>
+  <div><dt>当前进度</dt><dd>23.5%</dd><div class="sub">step 91,776 · 08-19 开跑</div></div>
+</dl>
+
+<!-- ================================================================= -->
+<section class="prose">
+<p>
+先说清楚这页在讲什么。「工业级 LLM 训练」在多数人的印象里是一句「拿很多数据训一个很大的模型」。
+真做起来，那句话对应的是<strong>一整套彼此咬合的子系统</strong>，其中只有一个是「训练」。
+下面这张图是全景；后面每一站单独展开。
+</p>
+</section>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 1000 360" role="img" aria-label="Marin 全流程：25.6T 原始池经数据流水线降到 23.1T，采样 18T 进入预训练；缩放梯预测配方，评测回流到数据与配方">
+<defs>
+  <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+  </marker>
+  <marker id="a1f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <polygon points="0,1 10,5 0,9" fill="#1c6b63"/>
+  </marker>
+</defs>
+<g font-family="JetBrains Mono, monospace" font-size="12" fill="currentColor">
+
+  <!-- upper: recipe -->
+  <rect x="196" y="18" width="176" height="46" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+  <text x="284" y="38" text-anchor="middle" font-size="12.5">缩放梯 Delphi</text>
+  <text x="284" y="54" text-anchor="middle" font-size="11" opacity="0.6">258 个 isoflop 检查点</text>
+  <line x1="372" y1="41" x2="470" y2="41" stroke="#1c6b63" stroke-width="1.6" marker-end="url(#a1f)"/>
+  <text x="421" y="33" text-anchor="middle" font-size="10.5" fill="#1c6b63">外推配方</text>
+  <line x1="470" y1="41" x2="470" y2="134" stroke="#1c6b63" stroke-width="1.6" marker-end="url(#a1f)"/>
+
+  <!-- main spine -->
+  <rect x="16" y="140" width="128" height="52" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="80" y="162" text-anchor="middle" font-size="12.5">原始池</text>
+  <text x="80" y="180" text-anchor="middle" font-size="13" font-weight="700">25.6T</text>
+
+  <line x1="144" y1="166" x2="196" y2="166" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)"/>
+
+  <rect x="196" y="140" width="146" height="52" fill="#1c6b63" fill-opacity="0.1" stroke="#1c6b63" stroke-width="1.6"/>
+  <text x="269" y="162" text-anchor="middle" font-size="12.5">Datakit</text>
+  <text x="269" y="180" text-anchor="middle" font-size="11" opacity="0.72">13 个阶段</text>
+
+  <line x1="342" y1="166" x2="398" y2="166" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)"/>
+  <text x="370" y="157" text-anchor="middle" font-size="10.5" fill="#9c4a3f">−2.5T</text>
+
+  <rect x="398" y="140" width="144" height="52" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="470" y="162" text-anchor="middle" font-size="12.5">清洗后 store</text>
+  <text x="470" y="180" text-anchor="middle" font-size="13" font-weight="700">23.1T</text>
+
+  <line x1="542" y1="166" x2="598" y2="166" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)"/>
+  <text x="570" y="157" text-anchor="middle" font-size="10.5" opacity="0.7">采样 18T</text>
+
+  <rect x="598" y="132" width="160" height="68" fill="#1c6b63" fill-opacity="0.1" stroke="#1c6b63" stroke-width="1.6"/>
+  <text x="678" y="154" text-anchor="middle" font-size="12.5">预训练</text>
+  <text x="678" y="171" text-anchor="middle" font-size="11" opacity="0.72">704 × GB200</text>
+  <text x="678" y="187" text-anchor="middle" font-size="11" opacity="0.72">390,251 步</text>
+
+  <line x1="758" y1="166" x2="812" y2="166" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)"/>
+
+  <rect x="812" y="140" width="172" height="52" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="898" y="161" text-anchor="middle" font-size="12.5">后训练</text>
+  <text x="898" y="178" text-anchor="middle" font-size="11" opacity="0.7">SFT · DPO · GRPO</text>
+
+  <!-- lower: eval -->
+  <rect x="598" y="256" width="160" height="46" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+  <text x="678" y="275" text-anchor="middle" font-size="12">在环评测</text>
+  <text x="678" y="291" text-anchor="middle" font-size="11" opacity="0.6">Paloma · 每 1000 步</text>
+  <line x1="678" y1="200" x2="678" y2="256" stroke="currentColor" stroke-width="1.2" marker-end="url(#a1)" opacity="0.6"/>
+
+  <rect x="812" y="256" width="172" height="46" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+  <text x="898" y="275" text-anchor="middle" font-size="12">离线评测</text>
+  <text x="898" y="291" text-anchor="middle" font-size="11" opacity="0.6">Evalchemy · Harbor</text>
+  <line x1="898" y1="192" x2="898" y2="256" stroke="currentColor" stroke-width="1.2" marker-end="url(#a1)" opacity="0.6"/>
+
+  <!-- feedback -->
+  <rect x="196" y="256" width="290" height="46" fill="none" stroke="#9c4a3f" stroke-width="1.3" stroke-dasharray="5 3"/>
+  <text x="341" y="275" text-anchor="middle" font-size="12" fill="#9c4a3f">/analysis/ 诊断页</text>
+  <text x="341" y="291" text-anchor="middle" font-size="11" fill="#9c4a3f" opacity="0.8">逐分片、逐字符的 bpb 差值</text>
+  <line x1="598" y1="279" x2="490" y2="279" stroke="#9c4a3f" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#a1)" opacity="0.85"/>
+  <line x1="269" y1="256" x2="269" y2="196" stroke="#9c4a3f" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#a1)"/>
+  <text x="200" y="230" font-size="10.5" fill="#9c4a3f">下一轮改配比</text>
+
+  <text x="16" y="336" font-size="11" opacity="0.55">实线 = 数据与权重的流向　　虚线 = 诊断结果的回流，跨轮次生效</text>
+</g>
+</svg>
+</div>
+<figcaption>
+全流程。左侧是物质流：原始 token 经过清洗损耗约 2.5T，再采样出 18T 的训练预算。
+上方的缩放梯不产出模型，它产出<strong>配方</strong>——用 258 个小模型外推出大模型该怎么配。
+下方虚线是这套体系真正特别的地方：评测结果不只是打分，它被做成逐分片的诊断页，回流去改下一轮的数据配比。
+</figcaption>
+</figure>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">01</span>
+  <h2>数据：一条 13 段的流水线</h2>
+  <span class="where">experiments/datakit/</span>
+</div>
+
+<div class="flowstrip">
+  <span class="k">入</span><span class="v">25.6T · 292 来源</span>
+  <span class="arrow">→</span>
+  <span class="k">去重去污染</span><span class="v drop">−2.494T</span>
+  <span class="arrow">→</span>
+  <span class="k">出</span><span class="v">23.106T · 40 簇 × 5 质量档</span>
+</div>
+
+<div class="prose">
+<p>
+大多数人以为数据处理就是「过滤一下」。实际的 DAG 有 13 个阶段，而且它们的<strong>并行性质不同</strong>——
+这是整条流水线最难的地方，也是下面这张图要说的事。
+</p>
+</div>
+
+<ol class="stages">
+  <li><span class="i">01</span><span class="n">normalize</span><span class="desc">原始格式 → 统一文本 schema</span></li>
+  <li><span class="i">02</span><span class="n">embed</span><span class="desc">用 Harrier-0.6B 给每篇文档做向量</span></li>
+  <li><span class="i">03</span><span class="n">tokenize</span><span class="desc">分词（供后续指纹用）</span></li>
+  <li><span class="i">04</span><span class="n">minhash</span><span class="desc">算 MinHash 签名</span></li>
+  <li class="global"><span class="i">05</span><span class="n">global_exact_dedup</span><span class="desc">全局精确去重，为每个 ID 选一条正本</span></li>
+  <li class="global"><span class="i">06</span><span class="n">dedup</span><span class="desc">LSH 找模糊重复候选簇</span></li>
+  <li class="global"><span class="i">07</span><span class="n">verify_fuzzy_dups</span><span class="desc">回原文逐对验证，只有全文匹配才标重复</span></li>
+  <li class="global"><span class="i">08</span><span class="n">cluster/train_centroids</span><span class="desc">K-means 5000 簇 → 层次聚合到 40 个语义桶</span></li>
+  <li><span class="i">09</span><span class="n">cluster_assign</span><span class="desc">把每篇文档归到某个语义桶</span></li>
+  <li><span class="i">10</span><span class="n">quality</span><span class="desc">质量分类器打分（GLM 5.2 标注蒸馏而来）</span></li>
+  <li class="global"><span class="i">11</span><span class="n">bloom</span><span class="desc">为评测集建 n-gram Bloom filter</span></li>
+  <li><span class="i">12</span><span class="n">decontam</span><span class="desc">逐源标记与评测集重合的文档</span></li>
+  <li class="global"><span class="i">13</span><span class="n">store</span><span class="desc">属性 join + 按 (簇, 质量档) 切成 Levanter 缓存</span></li>
+</ol>
+
+<div class="prose">
+<p>
+底色标出的是<strong>全局阶段</strong>：它们必须同时看到所有来源才能算，无法按源切开并行。
+其余阶段是逐源的，可以无限横向扩展。两者交替出现，正是流水线工程量的来源。
+</p>
+</div>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 940 300" role="img" aria-label="Datakit DAG：逐源阶段可并行，全局阶段必须收拢所有来源，两者交替三次">
+<defs>
+  <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+  </marker>
+</defs>
+
+<g font-family="JetBrains Mono, monospace" font-size="11.5" fill="currentColor">
+  <text x="14" y="20" font-size="11" opacity="0.6">292 个来源</text>
+
+  <!-- three source lanes -->
+  <g opacity="0.9">
+    <rect x="14" y="34" width="150" height="26" fill="none" stroke="currentColor" stroke-width="1.1"/>
+    <text x="89" y="51" text-anchor="middle">source A</text>
+    <rect x="14" y="70" width="150" height="26" fill="none" stroke="currentColor" stroke-width="1.1"/>
+    <text x="89" y="87" text-anchor="middle">source B</text>
+    <text x="89" y="112" text-anchor="middle" font-size="14" opacity="0.5">⋮</text>
+    <rect x="14" y="120" width="150" height="26" fill="none" stroke="currentColor" stroke-width="1.1"/>
+    <text x="89" y="137" text-anchor="middle">source Z</text>
+  </g>
+
+  <!-- per-source stage 1 -->
+  <line x1="164" y1="47" x2="196" y2="47" stroke="currentColor" stroke-width="1.1" marker-end="url(#a2)"/>
+  <line x1="164" y1="83" x2="196" y2="83" stroke="currentColor" stroke-width="1.1" marker-end="url(#a2)"/>
+  <line x1="164" y1="133" x2="196" y2="133" stroke="currentColor" stroke-width="1.1" marker-end="url(#a2)"/>
+  <rect x="196" y="30" width="120" height="120" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="3 3"/>
+  <text x="256" y="76" text-anchor="middle" font-size="12">逐源</text>
+  <text x="256" y="94" text-anchor="middle" font-size="10.5" opacity="0.62">normalize · embed</text>
+  <text x="256" y="109" text-anchor="middle" font-size="10.5" opacity="0.62">tokenize · minhash</text>
+
+  <!-- global bar 1 -->
+  <line x1="316" y1="47" x2="356" y2="82" stroke="currentColor" stroke-width="1.1"/>
+  <line x1="316" y1="90" x2="356" y2="90" stroke="currentColor" stroke-width="1.1"/>
+  <line x1="316" y1="133" x2="356" y2="98" stroke="currentColor" stroke-width="1.1"/>
+  <rect x="356" y="30" width="118" height="120" fill="#1c6b63" fill-opacity="0.13" stroke="#1c6b63" stroke-width="1.6"/>
+  <text x="415" y="70" text-anchor="middle" font-size="12" fill="#1c6b63">全局</text>
+  <text x="415" y="88" text-anchor="middle" font-size="10.5" fill="#1c6b63" opacity="0.85">exact dedup</text>
+  <text x="415" y="103" text-anchor="middle" font-size="10.5" fill="#1c6b63" opacity="0.85">fuzzy + verify</text>
+  <text x="415" y="118" text-anchor="middle" font-size="10.5" fill="#1c6b63" opacity="0.85">centroids</text>
+
+  <!-- fan back out -->
+  <line x1="474" y1="82" x2="514" y2="47" stroke="currentColor" stroke-width="1.1"/>
+  <line x1="474" y1="90" x2="514" y2="90" stroke="currentColor" stroke-width="1.1"/>
+  <line x1="474" y1="98" x2="514" y2="133" stroke="currentColor" stroke-width="1.1"/>
+  <rect x="514" y="30" width="126" height="120" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="3 3"/>
+  <text x="577" y="76" text-anchor="middle" font-size="12">逐源</text>
+  <text x="577" y="94" text-anchor="middle" font-size="10.5" opacity="0.62">cluster_assign</text>
+  <text x="577" y="109" text-anchor="middle" font-size="10.5" opacity="0.62">quality · decontam</text>
+
+  <!-- global store -->
+  <line x1="640" y1="47" x2="680" y2="82" stroke="currentColor" stroke-width="1.1"/>
+  <line x1="640" y1="90" x2="680" y2="90" stroke="currentColor" stroke-width="1.1"/>
+  <line x1="640" y1="133" x2="680" y2="98" stroke="currentColor" stroke-width="1.1"/>
+  <rect x="680" y="52" width="118" height="76" fill="#1c6b63" fill-opacity="0.13" stroke="#1c6b63" stroke-width="1.6"/>
+  <text x="739" y="80" text-anchor="middle" font-size="12" fill="#1c6b63">全局</text>
+  <text x="739" y="98" text-anchor="middle" font-size="10.5" fill="#1c6b63" opacity="0.85">store</text>
+  <text x="739" y="113" text-anchor="middle" font-size="10.5" fill="#1c6b63" opacity="0.85">属性 join</text>
+
+  <line x1="798" y1="90" x2="838" y2="90" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
+  <rect x="838" y="52" width="88" height="76" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="882" y="78" text-anchor="middle" font-size="11.5">40 × 5</text>
+  <text x="882" y="95" text-anchor="middle" font-size="10.5" opacity="0.65">缓存分片</text>
+  <text x="882" y="112" text-anchor="middle" font-size="10.5" opacity="0.65">23.1T</text>
+
+  <text x="14" y="196" font-size="11" opacity="0.6">虚线框 = 可按源无限并行　　实心框 = 必须收拢全部来源，是流水线的同步点</text>
+  <text x="14" y="216" font-size="11" opacity="0.6">三次收拢意味着整条链上有三道墙：任何一个源慢，整批都等</text>
+</g>
+</svg>
+</div>
+<figcaption>
+Datakit 的并行结构。去重、聚类中心、最终 store 都必须看到全量数据，
+所以流水线在这三处收拢——这也是为什么他们要自研 Zephyr（分布式数据处理）而不是直接用现成工具：
+落后者（straggler）诊断在这种结构下是头等问题。
+</figcaption>
+</figure>
+
+<div class="note">
+<span class="tag">值得注意</span>
+<p>
+去污染这一步在学术复现里几乎总被跳过，但它决定了你的 benchmark 分数有多少是真的。
+Marin 这次针对 lm-evaluation-harness 和 Artificial Analysis Intelligence Index 做 n-gram 匹配，
+<strong>删掉了约 25 万篇文档</strong>。模糊去重那一步也做得比常见实现严格：LSH 只用来找候选，
+真正标记重复必须回到原文做全文匹配，还要求行数比 ≥ 0.8。
+</p>
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">02</span>
+  <h2>配方：先训 258 个小模型</h2>
+  <span class="where">Delphi · isoflop 扫描</span>
+</div>
+
+<div class="prose">
+<p>
+这一站是外行最容易忽略、内行最不敢省的一步。在花 100 天训一个 535B 之前，
+他们先用约 <strong>1% 的算力</strong>训了一整梯子的小模型，跨度从 3e18 到 1e23 FLOPs，
+用它们拟合缩放律，再外推出大模型该用什么形状、什么学习率、什么 D/N 配比。
+</p>
+<p>这不只是为了选超参。<a href="https://github.com/marin-community/marin/issues/8435">他们自己列的四条理由</a>里，最有说服力的是后两条：</p>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>理由</th><th>实际发生过的事</th></tr></thead>
+<tbody>
+<tr><td>抓 bug</td><td>如果外推出的性能明显低于历史配方，说明架构或数据有问题，还没烧钱就能发现</td></tr>
+<tr><td>看训练动力学</td><td>上一次梯子发现梯度范数随 token 预算涨到 4 以上，才定位到需要 logit z-loss；否则在大 batch 下会中途炸掉</td></tr>
+<tr><td>全程有参照线</td><td>100 天里任何一刻都知道自己相对预测线偏了多少，偏了就立刻查</td></tr>
+<tr><td>区分正常与异常</td><td>大跑里看到梯度范数前 40% 一路涨，因为小跑里也这样，就知道不用干预</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="prose">
+<p>
+代价是 1% 的算力。收益是把「训到一半发现配方错了」这个 100 天量级的风险，
+换成一个几天就能发现的问题。<strong>258 个 isoflop 检查点全部公开在 HuggingFace 上</strong>，
+外加 88 个 Delphi 检查点。
+</p>
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">03</span>
+  <h2>预训练：正在跑的那 100 天</h2>
+  <span class="where">lib/levanter · experiments/grug</span>
+</div>
+
+<div class="flowstrip">
+  <span class="k">模型</span><span class="v">535.5B 总 / 22.8B 激活</span>
+  <span class="arrow">·</span>
+  <span class="k">批</span><span class="v">11,264 序列 = 46.1M tokens/步</span>
+  <span class="arrow">·</span>
+  <span class="k">MFU</span><span class="v">23.2%</span>
+  <span class="arrow">·</span>
+  <span class="k">吞吐</span><span class="v">2.72M tok/s</span>
+  <span class="arrow">·</span>
+  <span class="k">路由丢弃</span><span class="v">0.012%</span>
+</div>
+
+<div class="prose">
+<p>
+模型是全 MoE：48 层，每层都是 384 个专家里 top-8 路由，外加 2 个共享专家，
+隐藏维 6144、专家宽度 3072、序列长 4096。参数量 535.5B，但每个 token 只激活 22.8B。
+</p>
+
+<h3>三个非主流选择</h3>
+<p>
+<strong>分位均衡路由，不用辅助损失。</strong>路由器在有偏 logits 上取 top-(K+1)，第 K+1 个当作该 token 的阈值；
+每个专家的偏置取自一个 10,000 桶的全局直方图分位数，<strong>下一步</strong>才以 stop-gradient 的方式施加。
+这样均衡专家负载完全不碰梯度——省掉了大家习以为常的 aux loss。
+</p>
+<p>
+<strong>combine 权重用 sigmoid 不用 softmax</strong>，重新缩放到固定和 2.5。
+<strong>LatentMoE</strong>：token 先压到 3072 维隐空间，中间过一个可学习的 RMSNorm，再进专家。
+</p>
+<p>
+<strong>自己手写 all-to-all。</strong>他们在 issue 里直说：在 JAX/XLA on GPU 上没找到更快的 MoE 通信方案，
+所以自己写。注意力也是自己写的 FlashAttention-4 CuTe kernel。
+</p>
+
+<h3>把代价量出来，再把它消掉</h3>
+<p>
+开跑用的是 <code>fixed_pooled_wave_all_to_all</code>：每个发送端对每个目的地一个固定池，分三个静态 wave，
+专家 ID 直接塞进激活载荷，因此不需要额外的元数据集合通信。代价是<strong>固定容量</strong>——超出的 token 直接丢掉，
+整体丢弃率 3.3%（发送端 3.26%，接收端 0.047%，瓶颈在发送侧）。
+</p>
+<p>
+他们没有含糊过去，而是<strong>同时跑两套评测</strong>：正常路由的，和关掉丢弃的。差值就是丢弃的真实标价：
+</p>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>评测（step 45,837）</th><th class="num">有丢弃 bpb</th><th class="num">无丢弃 bpb</th><th class="num">代价</th></tr></thead>
+<tbody>
+<tr><td>整体</td><td class="num">0.7368</td><td class="num">0.6614</td><td class="num">+0.075</td></tr>
+<tr><td class="mono">ao3_english</td><td class="num">0.9357</td><td class="num">0.8097</td><td class="num">+0.126</td></tr>
+<tr><td class="mono">dolma_100_programing_languages</td><td class="num">0.4527</td><td class="num">0.3582</td><td class="num">+0.094</td></tr>
+<tr><td class="mono">mc4</td><td class="num">0.6999</td><td class="num">0.6671</td><td class="num">+0.033</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="prose">
+<p>
+分域差异接近四倍。这张表的作用不是自我批评，是<strong>给一个工程决策定价</strong>——
+它回答了「值不值得为了消除丢弃去换一套通信实现」。
+</p>
+</div>
+
+<div class="note flow">
+<span class="tag">2026-09-09 更新</span>
+<p>
+答案是值得，而且他们做了。主跑在 step 81,716 切换到 <code>ragged_all_to_all</code>：
+<strong>丢弃率 3.3% → 0.012%</strong>，同时 MFU 从 21.5% 升到 23.2%、峰值显存从 136.3 GiB 降到 103.6 GiB。
+上面那张代价表因此整体作废——他们现在<strong>既拿到了无丢弃的质量，又跑得更快</strong>。
+切换过程见第 08 站。
+</p>
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">04</span>
+  <h2>后训练：SFT → 偏好 → RL</h2>
+  <span class="where">experiments/sft · MarinSkyRL</span>
+</div>
+
+<div class="prose">
+<p>
+基座出来以后是三段，而且这三段在仓库里的成熟度明显不同。
+</p>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>阶段</th><th>位置</th><th>做法</th><th class="num">近半年提交</th></tr></thead>
+<tbody>
+<tr>
+  <td>SFT</td><td class="mono">experiments/sft/launcher.py</td>
+  <td>ShareGPT/OpenAI → 规范 messages → 可插拔 chat 模板 + <strong>只对补全部分算损失</strong> → 训练</td>
+  <td class="num">8</td>
+</tr>
+<tr>
+  <td>DPO</td><td class="mono">levanter/dpo.py</td>
+  <td>原生实现，配 UltraFeedback 等配置；另有 LoRA 版本</td>
+  <td class="num">6</td>
+</tr>
+<tr>
+  <td>RL</td><td class="mono">marin/rl/skyrl.py</td>
+  <td>仓库里<strong>只有一个 414 行的适配器</strong>；真正的训练器在外部 MarinSkyRL 仓库，按 commit 钉死</td>
+  <td class="num">62</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="prose">
+<p>
+有一个文件把全链路串成了一张图：<code>experiments/post_training/iceball_micro.py</code>。
+它的 docstring 第一句是「一张 Marin 图，从随机初始化预训练一路走到评测」——
+从零训 Qwen3-0.6B → 短 chat SFT → 在 GSM8K 上跑 GRPO → 把最终策略服务化 → 跑 Evalchemy 和 Harbor。
+一个入口，可以按 stage 单独执行：
+</p>
+<p><code>python -m experiments.post_training.iceball_micro --version 2026.08.01 --stage rl --run</code></p>
+</div>
+
+<div class="note">
+<span class="tag">值得注意</span>
+<p>
+注意那个 62 对 8 的提交数差异。<strong>预训练和后训练在这个项目里不是一回事</strong>：
+预训练是 TPU/JAX/Levanter，RL 那条链是 GPU/vLLM/PyTorch，通过钉死 commit 的外部依赖接进来。
+这是行业普遍现实——两段用的是两套完全不同的技术栈，中间靠 checkpoint 格式转换和服务化接口连接。
+</p>
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">05</span>
+  <h2>评测：三条路径，各管一段</h2>
+  <span class="where">docs/explanations/evaluation.md</span>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>路径</th><th>时机</th><th>测什么</th><th>怎么跑</th></tr></thead>
+<tbody>
+<tr><td><strong>在环评测</strong></td><td>训练中，每 1000 步</td>
+  <td>Paloma 16 个分片 + uncheatable_eval 的 bpb / loss</td>
+  <td>Levanter 内建的 lm-eval-harness 集成，直接写 W&amp;B</td></tr>
+<tr><td><strong>离线评测</strong></td><td>checkpoint 产出后</td>
+  <td>选择题 + 生成任务</td>
+  <td>把模型起成 OpenAI 兼容端点，Evalchemy 打它——选择题走 logprob API，和生成走同一条路</td></tr>
+<tr><td><strong>Harbor</strong></td><td>checkpoint 产出后</td>
+  <td>容器化的 agent 基准</td>
+  <td>独立的 driver，跑真实环境里的任务</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="prose">
+<p>
+把评测后端和推理后端用一个 URL 解耦，是个值得抄的工程决定：
+<code>remote_inference</code> 只管起停和存活探测，<code>run_evalchemy</code> 只管任务和结果契约。
+换推理引擎不影响评测代码，换评测不影响服务。
+</p>
+<p>
+更值得注意的是评测的<strong>产出形态</strong>。分数只是最浅的一层，他们还把结果做成三个公开的诊断页：
+逐语料的 bpb 差值仪表盘、下钻到<strong>逐字符</strong>的电路覆盖分析、以及一个缩放律浏览器。
+上面全景图里那条虚线回流，指的就是这个。
+</p>
+<p>
+以及最直接的一个用途：<strong>知道自己现在站在哪</strong>。下一站。
+</p>
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">06</span>
+  <h2>现在处于什么水平</h2>
+  <span class="where">issue #8824</span>
+</div>
+
+<div class="flowstrip">
+  <span class="k">当前实测</span><span class="v">0.8188</span>
+  <span class="arrow">→</span>
+  <span class="k">最终预测</span><span class="v">0.7406</span>
+  <span class="arrow">·</span>
+  <span class="k">最好的开源基座</span><span class="v">0.6754</span>
+  <span class="arrow">·</span>
+  <span class="k">单位</span><span class="v">Paloma BPB，越低越好</span>
+</div>
+
+<div class="prose">
+<p>
+训练到一半，怎么知道最后会落在什么位置？他们把缩放梯的外推线和当下的实测，
+一起放进同一张开源基座的横向表里。同一个 Paloma revision、同样 16 个子集、同样的滚动上下文策略。
+</p>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>模型</th><th class="num">Paloma BPB</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>Kimi K2 Base</td><td class="num">0.6754</td><td class="dim">当前最好的开源基座</td></tr>
+<tr><td>DeepSeek V4 Pro Base</td><td class="num">0.6759</td><td class="dim">在全部 16 个子集上都优于 Hero 预测</td></tr>
+<tr><td>DeepSeek V4 Flash Base</td><td class="num">0.7351</td><td></td></tr>
+<tr><td><strong>Hero 最终预测</strong></td><td class="num"><strong>0.7406</strong></td><td class="dim">缩放律外推，非实测</td></tr>
+<tr><td>Nemotron 3 Ultra-550B-A55B-Base</td><td class="num">0.7567</td><td></td></tr>
+<tr><td>Mistral Large 3 675B Base</td><td class="num">0.7759</td><td></td></tr>
+<tr><td>OLMo 3 32B Base</td><td class="num">0.8146</td><td></td></tr>
+<tr><td><strong>Hero 当前实测</strong>（step 45,837，无丢弃）</td><td class="num"><strong>0.8188</strong></td><td class="dim">彼时训完约 12% 预算</td></tr>
+<tr><td>Qwen3.5-35B-A3B-Base</td><td class="num">0.8397</td><td></td></tr>
+<tr><td>Gemma 4 26B-A4B</td><td class="num">0.8494</td><td></td></tr>
+<tr><td><strong>Hero 当前实测</strong>（step 45,837，含路由丢弃）</td><td class="num"><strong>0.8868</strong></td><td class="dim">彼时尚未换 ragged 传输</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="prose">
+<p>
+三件事要分清。<strong>0.7406 是预测不是成绩</strong>——它来自预注册的缩放律，16 个子集各自校准，
+用了 77 次梯级评测，最低 R² 0.971；报告里明确写着「预测假设原始 4K 配方，实际跑可能改变」。
+<strong>0.8188 才是当下</strong>，那时只训了 12% 的预算，排在 OLMo 3 32B 之后完全符合预期。
+而<strong>预测落点大致平齐 DeepSeek V4 Flash</strong>：能压过 Nemotron 3 Ultra-550B 和 Mistral Large 3 675B，
+但离 Kimi K2 还差 8.8%。
+</p>
+</div>
+
+<div class="note">
+<span class="tag">值得注意</span>
+<p>
+负责这项对比的人在结题时写道：最令人兴奋的是预测落在 DeepSeek V4 Flash 的困惑度水平，
+然后补了一句——<em>「我承认自己有点将信将疑，不过那可能是我自己的不安全感」</em>。
+把这句留在公开 issue 里，和把 0.8868 那个难看的当期数字留在表里，是同一种做法。
+</p>
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">07</span>
+  <h2>底座：没人写进论文的那一半</h2>
+  <span class="where">lib/</span>
+</div>
+
+<div class="prose">
+<p>
+这是整页最反直觉的一节。把仓库按代码量排开，<strong>最大的包不是训练框架</strong>：
+</p>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>包</th><th class="num">行数</th><th>职责</th></tr></thead>
+<tbody>
+<tr><td class="mono">iris</td><td class="num">151,509</td><td>自研集群调度器，跨异构集群调度作业与 gang 重试</td></tr>
+<tr><td class="mono">levanter</td><td class="num">126,632</td><td>JAX 训练框架（含 20 个优化器、22 种模型、自研推理引擎）</td></tr>
+<tr><td class="mono">marin</td><td class="num">56,157</td><td>编排层：懒惰产物、数据、评测</td></tr>
+<tr><td class="mono">haliax</td><td class="num">24,848</td><td>命名张量库，Levanter 的底座</td></tr>
+<tr><td class="mono">rigging</td><td class="num">21,910</td><td>存储抽象：GCS/S3、分布式锁、跨区镜像</td></tr>
+<tr><td class="mono">zephyr</td><td class="num">18,432</td><td>分布式数据处理：shuffle、parquet scan、查询计划</td></tr>
+<tr><td class="mono">finelog</td><td class="num">12,239</td><td>日志与遥测</td></tr>
+<tr><td class="mono dim">ducky / finestore / fray / dupekit</td><td class="num dim">12,503</td><td class="dim">SQL 看板、分片存储、actor 抽象、去重</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="prose">
+<p>
+<strong>调度器比训练框架还大。</strong>而且过去 90 天的改动热度里，<code>lib/iris</code> 以 4,374 次文件改动排第一，
+是第三名 Levanter（1,133）的近四倍。
+</p>
+
+<h3>执行模型：懒惰产物</h3>
+<p>
+所有东西——分词、训练、评测——都是一个 <code>ArtifactStep[T]</code> 句柄，由 <code>name@version</code> 唯一标识。
+构造句柄不执行任何计算；把图交给 runner 才执行，而且<strong>每步只跑一次，之后永久缓存</strong>。
+版本是日历版本 <code>YYYY.MM.DD</code>，不是内容哈希——所以路径可读、可预测。
+改了构建方式但没改版本号，会给一个漂移警告并继续用缓存。
+</p>
+<p>
+这个设计的意义在于：一个实验脚本就是一张<strong>可复现的溯源图</strong>。
+你拿到别人的实验，改一个节点，其余全部命中缓存。
+</p>
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">08</span>
+  <h2>运维：真实发生的事</h2>
+  <span class="where">issue #8506</span>
+</div>
+
+<div class="flowstrip">
+  <span class="k">头 12 天可用率</span><span class="v drop">95.5%</span>
+  <span class="arrow">→</span>
+  <span class="k">当前 run</span><span class="v">99.4%</span>
+  <span class="arrow">·</span>
+  <span class="k">主跑换代</span><span class="v">3 次</span>
+  <span class="arrow">·</span>
+  <span class="k">事件日志</span><span class="v">40 条</span>
+</div>
+
+<div class="prose">
+<p>
+这一节是这页存在的主要理由。论文和技术报告里从不写这部分，但它占了实际工作量的一大块。
+开跑后头 12 天的公开日志长这样：
+</p>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>日期</th><th class="num">step</th><th>发生了什么</th></tr></thead>
+<tbody>
+<tr><td class="mono">08-19</td><td class="num">164</td><td>手动测试恢复失败，host OOM</td></tr>
+<tr><td class="mono">08-20</td><td class="num">—</td><td>每约 3 小时 OOM 一次，调 XLA 显存比例</td></tr>
+<tr><td class="mono">08-21</td><td class="num">2,359</td><td>节点 NVLink 不可纠正错误，同机架 3 个 task 一起挂</td></tr>
+<tr><td class="mono">08-22</td><td class="num">—</td><td><code>malloc_trim</code> 没解决 checkpoint OOM，改用 jemalloc</td></tr>
+<tr><td class="mono">08-23</td><td class="num">11,252</td><td>存 checkpoint 时再次 OOM</td></tr>
+<tr><td class="mono">08-24</td><td class="num">—</td><td>定位到 TensorStore commit future 不清理；2GB 的 coordinator 自己 OOM，重试预算为 0，把 176 个 task 全带走 → 改 4GB + 重试 1000</td></tr>
+<tr><td class="mono">08-27</td><td class="num">27,000</td><td>节点掉网，JAX 报 3 个进程心跳丢失，K8s 11 秒后标 NotReady；Iris 原子重试整个 176-task gang 并恢复</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+<span class="tag">这才是重点</span>
+<p>
+七条记录里，<strong>没有一条是关于模型质量的</strong>。全是内存、网络、检查点序列化和重试策略。
+这就是 100 天量级训练的真实构成：模型是被设计出来的，但能不能训完，取决于你的基础设施能不能在
+704 张卡上连续正确运行三个月。这也解释了为什么调度器的代码量比训练框架还大。
+</p>
+</div>
+
+<h3>一次换代：怎么在跑着的模型上换掉通信实现</h3>
+
+<div class="prose">
+<p>
+2026-09-09 这一天的日志值得单独读。他们要把第 03 站那套有丢弃的传输，换成无丢弃的
+<code>ragged_all_to_all</code>——在一个已经训了三周、花掉数百万美元算力的作业上。做法是这样的：
+</p>
+</div>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 920 280" role="img" aria-label="配对对照切换：从同一个强制检查点分出对照组与实验组，跑同样 200 步同样批次后比较，再正式切换">
+<defs>
+  <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+  </marker>
+  <marker id="a4f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <polygon points="0,1 10,5 0,9" fill="#1c6b63"/>
+  </marker>
+</defs>
+<g font-family="JetBrains Mono, monospace" font-size="11.5" fill="currentColor">
+
+  <rect x="14" y="104" width="152" height="52" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="90" y="126" text-anchor="middle" font-size="12">旧跑（pooled-wave）</text>
+  <text x="90" y="143" text-anchor="middle" font-size="10.5" opacity="0.7">训至 step 81,716</text>
+
+  <line x1="166" y1="130" x2="214" y2="130" stroke="currentColor" stroke-width="1.4" marker-end="url(#a4)"/>
+
+  <rect x="214" y="98" width="136" height="64" fill="#1c6b63" fill-opacity="0.12" stroke="#1c6b63" stroke-width="1.6"/>
+  <text x="282" y="120" text-anchor="middle" font-size="12" fill="#1c6b63">强制检查点</text>
+  <text x="282" y="136" text-anchor="middle" font-size="10.5" fill="#1c6b63" opacity="0.85">5.36 TB · 26,795 对象</text>
+  <text x="282" y="151" text-anchor="middle" font-size="10.5" fill="#1c6b63" opacity="0.85">标记为不可清理</text>
+
+  <!-- split -->
+  <line x1="350" y1="118" x2="404" y2="56" stroke="currentColor" stroke-width="1.3" marker-end="url(#a4)"/>
+  <line x1="350" y1="142" x2="404" y2="204" stroke="#1c6b63" stroke-width="1.6" marker-end="url(#a4f)"/>
+
+  <rect x="404" y="30" width="196" height="52" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <text x="502" y="50" text-anchor="middle" font-size="12">对照组：旧跑继续</text>
+  <text x="502" y="67" text-anchor="middle" font-size="10.5" opacity="0.7">再训 200 步后才关停</text>
+
+  <rect x="404" y="178" width="196" height="52" fill="#1c6b63" fill-opacity="0.12" stroke="#1c6b63" stroke-width="1.6"/>
+  <text x="502" y="198" text-anchor="middle" font-size="12" fill="#1c6b63">实验组：新传输</text>
+  <text x="502" y="215" text-anchor="middle" font-size="10.5" fill="#1c6b63" opacity="0.85">从同一检查点恢复，同样 200 步</text>
+
+  <text x="502" y="130" text-anchor="middle" font-size="11" opacity="0.75">同样的批次、同样的数据顺序</text>
+
+  <line x1="600" y1="56" x2="654" y2="118" stroke="currentColor" stroke-width="1.3" marker-end="url(#a4)"/>
+  <line x1="600" y1="204" x2="654" y2="142" stroke="#1c6b63" stroke-width="1.6" marker-end="url(#a4f)"/>
+
+  <rect x="654" y="98" width="122" height="64" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="715" y="120" text-anchor="middle" font-size="12">逐步比对</text>
+  <text x="715" y="136" text-anchor="middle" font-size="10.5" opacity="0.7">loss 差 −0.0065</text>
+  <text x="715" y="151" text-anchor="middle" font-size="10.5" opacity="0.7">MFU 23.1 vs 21.5</text>
+
+  <line x1="776" y1="130" x2="822" y2="130" stroke="#1c6b63" stroke-width="1.6" marker-end="url(#a4f)"/>
+  <rect x="822" y="104" width="84" height="52" fill="#1c6b63" fill-opacity="0.12" stroke="#1c6b63" stroke-width="1.6"/>
+  <text x="864" y="126" text-anchor="middle" font-size="12" fill="#1c6b63">正式切换</text>
+  <text x="864" y="143" text-anchor="middle" font-size="10.5" fill="#1c6b63" opacity="0.85">血统留在 main</text>
+
+  <text x="14" y="264" font-size="11" opacity="0.6">关键在于两条分支从同一个检查点出发、吃同样的批次——差值才可归因于传输实现本身</text>
+</g>
+</svg>
+</div>
+<figcaption>
+配对对照式的生产切换。多数团队会直接停旧跑、起新跑，然后争论「是不是变好了」。
+这里旧跑被<strong>多训了 200 步专门当对照组</strong>，代价是一段重复算力，换来一个可归因的结论。
+</figcaption>
+</figure>
+
+<div class="prose">
+<p>
+然后<strong>连挂四次</strong>。新传输起来后，四次尝试挂了四次，分别在机架 7、9、1、2，
+完成步数 43、0、0、0。症状每次一样：某个机架的所有 task 掉到 4.0 核（其他十个机架是 8.0），
+NCCL RAS 显示每个跨机架 AllReduce 都有<strong>恰好一个成员落后三个操作</strong>，
+没有任何报错行，py-spy 显示所有 rank——卡住的和健康的——都停在同一处 jit 后的 <code>train_step</code> 里。
+</p>
+<p>
+第六次尝试换了一个 PJRT wheel，唯一区别是设备 kernel 用 <strong>NCCL 2.30.7 的头文件</strong>编译，
+而不是 2.29.7。一次通过，200 步零挂起。同日对比：2.29.7 头文件四次挂四次；2.30.7 约 1900 步挂一次。
+</p>
+<p>
+<strong>最后还要再部署一次。</strong>因为那个 wheel 在本地分支上、走预签名 URL，
+用他们自己的话说：<em>「这个跑没法从 main 复现」</em>。所以把 header 改动合成正式 release，
+用新 run ID 从 main 重新起，仍然从同一个 step-81,716 恢复，让血统留在主干提交上。
+再验证新二进制与试跑的差异：平均 −0.00008 nats，最大绝对值 0.00046。
+</p>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>配对窗口 202 步</th><th class="num">ragged</th><th class="num">对照（pooled-wave）</th></tr></thead>
+<tbody>
+<tr><td>loss 差</td><td class="num">−0.0065 nats</td><td class="num">—</td></tr>
+<tr><td>容量溢出率</td><td class="num">7.8e-5</td><td class="num">3.4e-2</td></tr>
+<tr><td>MFU</td><td class="num">23.11%</td><td class="num">21.46%</td></tr>
+<tr><td>峰值 HBM</td><td class="num">103.6 GiB</td><td class="num">136.3 GiB</td></tr>
+<tr><td>负载均衡损失</td><td class="num">7.999</td><td class="num">8.004</td></tr>
+<tr><td>router z loss</td><td class="num">16.90</td><td class="num">17.10</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+<span class="tag">还没解决</span>
+<p>
+换头文件把挂起频率从「四次挂四次」压到「约 1900 步挂一次」，但没有根治。
+09-10 又挂了一次（机架 0），watchdog 在 924 秒后终止整个 gang，Iris 自动重试，
+<strong>21 分钟恢复、重放 3 步</strong>。
+</p>
+<p>
+更硬的线索来自同日的另一次故障：机架 9 报 <code>CUDA_ERROR_NVLINK_UNCORRECTABLE</code>——
+硬件级的 NVLink 不可纠正错误。负责人指出机架 9 这一周每次调度都落在同一批物理节点上，
+且此前已被标记为 barrier 落后者。也就是说，<strong>他们现在怀疑这不是自己的 bug，
+而是云厂商的机架有问题</strong>——而作为租户，他们看不到 fabric-manager 的日志。
+</p>
+</div>
+
+<div class="prose">
+<p>
+这一整段没有一个字关于模型。它关于：怎么在不可复现的二进制和可复现的主干之间做取舍，
+怎么给一次变更设计对照组，以及当问题在你看不见的硬件层时该留下什么证据。
+<strong>这是工业级训练里最真实、也最不会被写进论文的那部分。</strong>
+</p>
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">09</span>
+  <h2>他们究竟交付了什么</h2>
+  <span class="where">公开产物清单</span>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>类别</th><th>内容</th><th>可及性</th></tr></thead>
+<tbody>
+<tr><td>代码</td><td>整个 monorepo：训练框架、调度器、数据流水线、评测、推理，10,216 次提交</td><td><span class="pill have">Apache-2.0</span></td></tr>
+<tr><td>模型</td><td>358 个 HuggingFace 模型：8B/32B 正式模型、258 个 isoflop 梯级、88 个 Delphi 检查点</td><td><span class="pill have">公开权重</span></td></tr>
+<tr><td>数据</td><td>95 个数据集，含数据来源与 token 计数的溯源表（按 commit 冻结）</td><td><span class="pill have">公开</span></td></tr>
+<tr><td>训练日志</td><td>W&amp;B 项目，含正在跑的 hero run 的 step / loss / MFU / 丢弃率 / 逐分片评测 / <strong>实时数据配比</strong></td><td><span class="pill have">匿名可读</span></td></tr>
+<tr><td>实验记录</td><td>每个实验一个 GitHub issue，含预注册的假设；失败的也留着</td><td><span class="pill have">公开</span></td></tr>
+<tr><td>事故日志</td><td>逐条的故障、诊断、干预记录</td><td><span class="pill have">公开</span></td></tr>
+<tr><td>诊断分析</td><td>三个交互式页面：困惑度差值仪表盘、电路覆盖分析、缩放律浏览器</td><td><span class="pill have">公开</span></td></tr>
+<tr><td>横向对比</td><td>与 13 个开源基座在同一 Paloma 套件上的逐子集报告，含把自己排在中游的那几行</td><td><span class="pill have">公开</span></td></tr>
+<tr><td>内部 wiki</td><td>Echo：事故根因分析、消融报告——公开 issue 里大量链接指向它</td><td><span class="pill gone">需组织账号</span></td></tr>
+<tr><td>集群</td><td>Iris 控制台、xprof trace</td><td><span class="pill gone">需组织账号</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="prose">
+<p>
+最后两行是这套「开放开发」承诺的边界所在：代码、权重、数据、指标、决策全公开，
+但深度归因写在需要登录的内部 wiki 上，而公开 issue 里又大量引用它。
+</p>
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="station">
+<div class="station-head">
+  <span class="station-num">10</span>
+  <h2>让这套流程与众不同的，是那个环</h2>
+  <span class="where">docs/explanations/experiments.md</span>
+</div>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 900 250" role="img" aria-label="实验生命周期闭环：issue 预注册假设，PR 提交代码，溯源图执行，W&B 报告，结论回到 issue；失败的实验同样留在记录里">
+<defs>
+  <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+  </marker>
+  <marker id="a3f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <polygon points="0,1 10,5 0,9" fill="#1c6b63"/>
+  </marker>
+</defs>
+
+<g font-family="JetBrains Mono, monospace" font-size="11.5" fill="currentColor">
+  <rect x="16" y="60" width="150" height="56" fill="#1c6b63" fill-opacity="0.12" stroke="#1c6b63" stroke-width="1.6"/>
+  <text x="91" y="82" text-anchor="middle" font-size="12">GitHub issue</text>
+  <text x="91" y="100" text-anchor="middle" font-size="10.5" opacity="0.72">预注册假设与目标</text>
+
+  <line x1="166" y1="88" x2="220" y2="88" stroke="currentColor" stroke-width="1.4" marker-end="url(#a3)"/>
+
+  <rect x="220" y="60" width="150" height="56" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="295" y="82" text-anchor="middle" font-size="12">Pull Request</text>
+  <text x="295" y="100" text-anchor="middle" font-size="10.5" opacity="0.7">expNNNN_*.py</text>
+
+  <line x1="370" y1="88" x2="424" y2="88" stroke="currentColor" stroke-width="1.4" marker-end="url(#a3)"/>
+
+  <rect x="424" y="60" width="160" height="56" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="504" y="82" text-anchor="middle" font-size="12">溯源图执行</text>
+  <text x="504" y="100" text-anchor="middle" font-size="10.5" opacity="0.7">每步只跑一次，缓存</text>
+
+  <line x1="584" y1="88" x2="638" y2="88" stroke="currentColor" stroke-width="1.4" marker-end="url(#a3)"/>
+
+  <rect x="638" y="60" width="150" height="56" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="713" y="82" text-anchor="middle" font-size="12">W&amp;B 报告</text>
+  <text x="713" y="100" text-anchor="middle" font-size="10.5" opacity="0.7">曲线与结论</text>
+
+  <!-- return edge -->
+  <path d="M713 116 L713 172 L91 172 L91 116" fill="none" stroke="#1c6b63" stroke-width="1.6" marker-end="url(#a3f)"/>
+  <rect x="330" y="158" width="150" height="28" fill="#1c6b63" fill-opacity="0.12" stroke="none"/>
+  <text x="405" y="177" text-anchor="middle" font-size="11" fill="#1c6b63">结论写回同一个 issue</text>
+
+  <!-- side outputs -->
+  <line x1="504" y1="60" x2="504" y2="30" stroke="currentColor" stroke-width="1.1" opacity="0.55" marker-end="url(#a3)"/>
+  <text x="514" y="26" font-size="10.5" opacity="0.6">HF 检查点 · /analysis/ 诊断页</text>
+
+  <text x="16" y="222" font-size="11" opacity="0.62">关键在于假设写在结果之前，而且失败的实验同样留在记录里——这是它区别于「只发成功案例」的地方</text>
+</g>
+</svg>
+</div>
+<figcaption>
+实验生命周期。这个环本身不新鲜，新鲜的是它<strong>被强制执行</strong>：
+文件命名约定要求实验脚本带上 issue 号，PR 正文要以 <code>Fixes #NNNN</code> 结尾，
+溯源图保证任何人拿到脚本都能复现。
+</figcaption>
+</figure>
+
+<div class="prose">
+<p>
+所以，一次工业级 LLM 训练到底是什么样子？把这十站合起来看，答案大致是：
+</p>
+<p>
+<strong>一份数据流水线</strong>（13 个阶段，三处全局同步点，损耗 10%）、
+<strong>一次 1% 算力的预演</strong>（258 个小模型换一条外推线）、
+<strong>一个三个月不能停的训练作业</strong>（704 张卡，23% MFU，开跑头两周约 5% 时间花在故障恢复上）、
+<strong>两套互不兼容的技术栈</strong>（预训练 JAX/TPU，RL PyTorch/GPU）、
+<strong>三条评测路径</strong>（在环、离线、agent），
+以及<strong>一个比训练框架还大的调度器</strong>。
+</p>
+<p>
+模型架构上的巧思——分位均衡、LatentMoE、手写 all-to-all——当然重要，
+但它们在总工作量里的占比，远小于任何一篇论文会让你以为的比例。
+最能说明问题的是这页更新时改动最大的两节：第 03 站的丢弃代价表整体作废，
+第 08 站多出一整段换代实录——<strong>三周里最重要的进展，是一次通信实现的替换</strong>。
+</p>
+</div>
+</section>
+
+<footer>
+<p>
+数据来源：<code>marin-community/marin</code> 仓库（本地克隆）、<code>marin-community/marin_moe</code> 的
+W&amp;B 公开项目、GitHub issues #8435 / #8506 / #8233 / #8824、HuggingFace <code>marin-community</code> 组织，
+以及 <a href="https://marin.community/">marin.community</a> 上的三个分析页。全部无需凭证即可访问。
+</p>
+<p>
+训练指标为 2026-09-12 03:25 UTC 的快照，step 91,776 / 390,251（23.52%），
+run id <code>hero-ragged_a2a-nccl2307-ep-step81k</code>。运行仍在继续，数字会变——
+主跑已因配置变更换过三次 run id，最近一次在 09-09。
+</p>
+</footer>
+
+</div>
