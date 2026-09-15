@@ -411,8 +411,17 @@ def build(data: dict) -> str:
 
     live = hero["state"] == "running" and hb_age < 3600
     state_tone = "ok" if live else ("warn" if hero["state"] == "running" else "crit")
+    # W&B marks a run "crashed" once heartbeats stop; the hero is usually retried
+    # under the same run id from its hourly checkpoint, so say it stopped rather
+    # than echoing the raw state.
     state_text = (
-        "训练中" if live else ("心跳停滞" if hero["state"] == "running" else hero["state"])
+        "训练中"
+        if live
+        else "心跳停滞"
+        if hero["state"] == "running"
+        else {"crashed": "已中断", "failed": "已失败", "finished": "已结束"}.get(
+            hero["state"], hero["state"]
+        )
     )
 
     loss_pts = [
